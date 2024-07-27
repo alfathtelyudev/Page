@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Presensi QR LDK Al-Fath Gen 11</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
         function setThemeClass() {
             document.documentElement.className= Telegram.WebApp.colorScheme;
@@ -29,6 +30,11 @@
             align-items: center;
             z-index: 9999;
         }
+        #reader {
+            width: 50%;
+            height: 50%;
+            margin: 0 auto;
+        }
     </style>
 <body>
     <div class="container">
@@ -42,6 +48,8 @@
                 </div>
                 <button type="submit" onclick="submit()" class="btn btn-primary">Submit</button>
                 <h3 id="informasi" class="mt-4">Silahkan masukan data yang sesuai</h3>
+    <div id="reader"></div>
+
                 <div id="loading" class="d-none">
                     <div class="spinner-border text-primary" role="status">
                         <span class="sr-only">Loading...</span>
@@ -57,19 +65,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+                    const html5QrCode = new Html5Qrcode("reader");
+
 // String Base64 yang ingin didekode
 
 // Mendekode Base64
 
 // Menampilkan hasil
+const lokasi = {}
+
         const tg = Telegram.WebApp
         tg.ready();
         let konfigurasi_presensi = {}
         // Get user data from Telegram WebApp
         const user = tg.initDataUnsafe.user;
-        if (user == null) {
-            document.querySelector('.container').innerHTML = '<h1>Maaf, Anda tidak memiliki akses ke halaman ini</h1>';
-        }
+        // if (user == null) {
+        //     document.querySelector('.container').innerHTML = '<h1>Maaf, Anda tidak memiliki akses ke halaman ini</h1>';
+        // }
         // Get the form
         var info = document.querySelector('#informasi');
         var loading = document.querySelector('#loading');
@@ -94,6 +106,11 @@
         }
                 
                 async function fetchKonfigurasiPresensi(id_presensi){
+                    if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((position)=>{
+lokasi.longitude = position.coords.longitude;
+lokasi.latitude = position.coords.latitude;}, (error)=>{console.log(error)});
+            }
                     const konfigurasi_presensi_cache = localStorage.getItem(`konfigurasi_presensi_${id_presensi}`);
                     if (konfigurasi_presensi_cache) {
                         konfigurasi_presensi = JSON.parse(konfigurasi_presensi_cache);
@@ -109,7 +126,7 @@
                                 headers: {
                                     'Content-Type': 'text/plain'
                                 },
-                                body: JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 })
+                                body: JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 , lokasi})
                             });
                             hideLoading();
                             const responseData = await response.json();
@@ -131,44 +148,83 @@
         
     
         function scanQr() {
+            
+            try {
+                showScanQrPopup();
+                
+            } catch (error) {
+                showScanQrBrowser();
+            }
+                
+            
+           
+        }
+        function showScanQrPopup(){
             tg.showScanQrPopup({
                 text: "Presensi: " + konfigurasi_presensi.nama_kegiatan?? 'Nama kegiatan tidak ditemukan'
-            }, function (text) {
-
-                showLoading();
-                tg.closeScanQrPopup();
-
-                fetch("https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", {
-                    
-                    method: 'POST',
-                    redirect: 'follow',
-
-                    headers: {
-                        'Content-Type': 'text/plain'
-                        
-                    },
-                    body: JSON.stringify({ 
-                        id_presensi: konfigurasi_presensi.id_presensi, 
-                        id_telegram: user?.id, 
-                        id_peserta_presensi: text,
-                        fullname_telegram: user?.first_name + user?.last_name,
-                    })
-                })
-                .then(response => response.json())
-                .then(responseData => {
-                    hideLoading();
-                    if (responseData.nama) {
-                        tg.showAlert("Berhasil\n" + printObject(responseData));
-                    } else {
-                        tg.showAlert('Gagal\n' + printObject(responseData));
-                    }
-                })
-                .catch(error => {
-                    hideLoading();
-                    tg.showAlert('Gagal\n' + error.message);
-                });
-            });
+            }, processQrCode);
         }
+        function showScanQrBrowser(){
+            hideLoading()
+            const config = { fps: 10, qrbox: {width: 250, height: 250} };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                qrCodeMessage => {
+                    html5QrCode.stop();
+
+                    info.innerHTML = "Tunggu sebentar...";
+                    processQrCode(qrCodeMessage);
+
+                },
+                errorMessage => {
+                    info.innerHTML = "Posisikan kode QR di tengah kamera";
+                })
+
+        }
+        function processQrCode(text) {
+
+showLoading();
+try {
+    tg.closeScanQrPopup();
+    
+} catch (error) {
+    
+}
+
+
+fetch("https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", {
+    
+    method: 'POST',
+    redirect: 'follow',
+
+    headers: {
+        'Content-Type': 'text/plain'
+        
+    },
+    body: JSON.stringify({ 
+        id_presensi: konfigurasi_presensi.id_presensi, 
+        id_telegram: user?.id, 
+        id_peserta_presensi: text,
+        fullname_telegram: user?.first_name + user?.last_name,
+        lokasi
+    })
+})
+.then(response => response.json())
+.then(responseData => {
+    hideLoading();
+    if (responseData.nama) {
+        tg.showAlert("Berhasil\n" + printObject(responseData));
+    } else {
+        info.innerHTML = printObject(responseData);
+        tg.showAlert('Gagal\n' + printObject(responseData));
+    }
+})
+.catch(error => {
+    hideLoading();
+    tg.showAlert('Gagal\n' + error.message);
+});
+}
         
         function printObject(object) {
             var output = '';
