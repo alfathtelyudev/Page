@@ -101,7 +101,7 @@
                 scanQr();
             } else {
                 const xhr = new XMLHttpRequest();
-                xhr.open('POST', "https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=fetchKonfigurasiPresensi", true);
+                xhr.open('POST', "https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=fetchKonfigurasiPresensi", true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                     hideLoading();
@@ -136,7 +136,7 @@
                 tg.closeScanQrPopup();
 
                 const xhr = new XMLHttpRequest();
-                xhr.open('POST', "https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", true);
+                xhr.open('POST', "https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                     hideLoading();
