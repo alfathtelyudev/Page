@@ -150,7 +150,7 @@
                     body: JSON.stringify({ 
                         id_presensi: konfigurasi_presensi.id_presensi, 
                         id_telegram: user?.id, 
-                        id_peserta_presensi: decodeBase64(text),
+                        id_peserta_presensi: text,
                         fullname_telegram: user?.first_name + user?.last_name,
                     })
                 })
