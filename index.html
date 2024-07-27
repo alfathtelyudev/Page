@@ -111,6 +111,7 @@
                                 },
                                 body: JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 })
                             });
+                            hideLoading();
                             const responseData = await response.json();
                             konfigurasi_presensi = responseData;
                             if (responseData.error) {
