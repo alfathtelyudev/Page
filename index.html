@@ -107,7 +107,7 @@
                                   // Opsi redirect: 'follow', 'error', atau 'manual'
 
                                 headers: {
-                                    'Content-Type': 'text/plain;charset=utf-8'
+                                    'Content-Type': 'text/plain'
                                 },
                                 body: JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 })
                             });
@@ -139,7 +139,7 @@
 
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', "https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Content-Type', 'text/plain');
                 xhr.onload = function() {
                     hideLoading();
                     try {
