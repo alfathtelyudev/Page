@@ -92,41 +92,42 @@
         function hideLoading() {
             loading.classList.add('d-none');
         }
-        
-        function fetchKonfigurasiPresensi(id_presensi){
-            const konfigurasi_presensi_cache = localStorage.getItem(`konfigurasi_presensi_${id_presensi}`);
-            if (konfigurasi_presensi_cache) {
-                konfigurasi_presensi = JSON.parse(konfigurasi_presensi_cache);
-                info.innerHTML = printObject(konfigurasi_presensi);
-                scanQr();
-            } else {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', "https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=fetchKonfigurasiPresensi", true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onload = function() {
-                    hideLoading();
-                    try {
-                        var responseData = JSON.parse(xhr.responseText);
-                        konfigurasi_presensi = responseData;
-                        if (responseData.error) {
-                            info.innerHTML = responseData.error;
-                        } else if (responseData.id_presensi) {
-                            info.innerHTML = printObject(responseData);
-                            scanQr();
-                            localStorage.setItem(`konfigurasi_presensi_${id_presensi}`, JSON.stringify(responseData));
-                        } else {
-                            info.innerHTML = 'Peremintaan gagal!' + ' ' + xhr.status + ' ' + xhr.responseText;
-                        }
-                    } catch (error) {
-                        info.innerHTML = 'Peremintaan gagal!' + ' ' + error.message;
-                    }
-                };
-                 
+                
+                async function fetchKonfigurasiPresensi(id_presensi){
+                    const konfigurasi_presensi_cache = localStorage.getItem(`konfigurasi_presensi_${id_presensi}`);
+                    if (konfigurasi_presensi_cache) {
+                        konfigurasi_presensi = JSON.parse(konfigurasi_presensi_cache);
+                        info.innerHTML = printObject(konfigurasi_presensi);
+                        scanQr();
+                    } else {
+                        try {
+                            const response = await fetch("https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=fetchKonfigurasiPresensi", {
+                                method: 'POST',
+                                redirect: 'follow',  // Opsi redirect: 'follow', 'error', atau 'manual'
 
-                xhr.send(JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 }));
-            }
-        }
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 })
+                            });
+                            const responseData = await response.json();
+                            konfigurasi_presensi = responseData;
+                            if (responseData.error) {
+                                info.innerHTML = responseData.error;
+                            } else if (responseData.id_presensi) {
+                                info.innerHTML = printObject(responseData);
+                                scanQr();
+                                localStorage.setItem(`konfigurasi_presensi_${id_presensi}`, JSON.stringify(responseData));
+                            } else {
+                                info.innerHTML = 'Peremintaan gagal!' + ' ' + response.status + ' ' + response.statusText;
+                            }
+                        } catch (error) {
+                            info.innerHTML = 'Peremintaan gagal!' + ' ' + error.message;
+                        }
+                    }
+                }
         
+    
         function scanQr() {
             tg.showScanQrPopup({
                 text: "Presensi: " + konfigurasi_presensi.nama_kegiatan?? 'Nama kegiatan tidak ditemukan'
