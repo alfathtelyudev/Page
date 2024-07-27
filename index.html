@@ -137,34 +137,31 @@
                 showLoading();
                 tg.closeScanQrPopup();
 
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', "https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", true);
-                xhr.setRequestHeader('Content-Type', 'text/plain');
-                xhr.onload = function() {
+                fetch("https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=appendDataPresensiUser", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: JSON.stringify({ 
+                        id_presensi: konfigurasi_presensi.id_presensi, 
+                        id_telegram: user?.id, 
+                        id_peserta_presensi: decodeBase64(text),
+                        fullname_telegram: user?.first_name + user?.last_name,
+                    })
+                })
+                .then(response => response.json())
+                .then(responseData => {
                     hideLoading();
-                    try {
-                        
-                        const responseData = JSON.parse(xhr.responseText);
-                        if (responseData.nama) {
-                            tg.showAlert("Berhasil\n" + printObject(responseData));
-                        } else {
-                            tg.showAlert('Gagal\n' + printObject(responseData));
-                        };
-                    } catch (error) {
-                        tg.showAlert('Gagal\n' + error.message);    
+                    if (responseData.nama) {
+                        tg.showAlert("Berhasil\n" + printObject(responseData));
+                    } else {
+                        tg.showAlert('Gagal\n' + printObject(responseData));
                     }
-                }   
-                xhr.onerror = function() {
+                })
+                .catch(error => {
                     hideLoading();
-                    tg.showConfirm('Gagal\n' + xhr.status + ' ' + xhr.responseText);
-                }
-                xhr.send(JSON.stringify({ 
-                    id_presensi: konfigurasi_presensi.id_presensi, 
-                    id_telegram: user?.id, 
-                    id_peserta_presensi: decodeBase64(text),
-                    fullname_telegram: user?.first_name + user?.last_name,
-                }));
-                
+                    tg.showAlert('Gagal\n' + error.message);
+                });
             });
         }
         
