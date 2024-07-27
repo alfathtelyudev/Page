@@ -73,6 +73,11 @@
 
 // Menampilkan hasil
 const lokasi = {}
+if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((position)=>{
+lokasi.longitude = position.coords.longitude;
+lokasi.latitude = position.coords.latitude;}, (error)=>{console.log(error)});
+            }
 
         const tg = Telegram.WebApp
         tg.ready();
@@ -106,11 +111,7 @@ const lokasi = {}
         }
                 
                 async function fetchKonfigurasiPresensi(id_presensi){
-                    if (navigator.geolocation){
-                navigator.geolocation.getCurrentPosition((position)=>{
-lokasi.longitude = position.coords.longitude;
-lokasi.latitude = position.coords.latitude;}, (error)=>{console.log(error)});
-            }
+                  
                     const konfigurasi_presensi_cache = localStorage.getItem(`konfigurasi_presensi_${id_presensi}`);
                     if (konfigurasi_presensi_cache) {
                         konfigurasi_presensi = JSON.parse(konfigurasi_presensi_cache);
