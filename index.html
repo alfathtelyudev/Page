@@ -103,10 +103,11 @@
                         try {
                             const response = await fetch("https://script.google.com/macros/s/AKfycbzwDQxmzZq3TCHxIienSNoIoqCfiMwTKpoik3LYflWGnMAC1PJDMDsB9STP3SqIkz3h/exec?action=fetchKonfigurasiPresensi", {
                                 method: 'POST',
-                                redirect: 'follow',  // Opsi redirect: 'follow', 'error', atau 'manual'
+                                redirect: 'follow',
+                                  // Opsi redirect: 'follow', 'error', atau 'manual'
 
                                 headers: {
-                                    'Content-Type': 'application/json'
+                                    'Content-Type': 'text/plain;charset=utf-8'
                                 },
                                 body: JSON.stringify({ id_presensi:  id_presensi, id_telegram: user?.id ?? 0 })
                             });
