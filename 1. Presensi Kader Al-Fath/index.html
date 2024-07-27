@@ -84,13 +84,15 @@ lokasi.latitude = position.coords.latitude;}, (error)=>{console.log(error)});
         let konfigurasi_presensi = {}
         // Get user data from Telegram WebApp
         const user = tg.initDataUnsafe.user;
-        // if (user == null) {
-        //     document.querySelector('.container').innerHTML = '<h1>Maaf, Anda tidak memiliki akses ke halaman ini</h1>';
-        // }
+        if (user == null) {
+            document.querySelector('.container').innerHTML = '<h1>Maaf, Anda tidak memiliki akses ke halaman ini</h1>';
+        }
         // Get the form
         var info = document.querySelector('#informasi');
         var loading = document.querySelector('#loading');
         function submit() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+
 
             console.log('submit')
             
